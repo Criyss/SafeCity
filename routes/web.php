@@ -38,3 +38,5 @@ Route::middleware(['auth', 'rol:administrador,supervisor,ciudadano'])->group(fun
 Route::get('/', function () {
     return redirect()->route('login');
 });
+Route::get('/mapa', [App\Http\Controllers\MapaController::class, 'index'])->middleware('auth');
+Route::get('/mapa/reportes', [App\Http\Controllers\MapaController::class, 'reportesJson'])->middleware('auth');
