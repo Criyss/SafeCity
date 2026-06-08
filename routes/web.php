@@ -40,3 +40,7 @@ Route::get('/', function () {
 });
 Route::get('/mapa', [App\Http\Controllers\MapaController::class, 'index'])->middleware('auth');
 Route::get('/mapa/reportes', [App\Http\Controllers\MapaController::class, 'reportesJson'])->middleware('auth');
+
+
+Route::get('/mapa-seguridad', [App\Http\Controllers\MapaController::class, 'mapaPublico']);
+Route::get('/mapa-seguridad/reportes', [App\Http\Controllers\MapaController::class, 'reportesPublicoJson']);
