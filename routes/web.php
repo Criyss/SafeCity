@@ -22,9 +22,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Rutas de administrador
 Route::middleware(['auth', 'rol:administrador'])->group(function () {
-    Route::get('/usuarios', function () {
-        return '<h1>Panel de Administración de Usuarios</h1>';
-    });
+    Route::get('/usuarios', [App\Http\Controllers\UserController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/create', [App\Http\Controllers\UserController::class, 'create'])->name('usuarios.create');
+    Route::post('/usuarios', [App\Http\Controllers\UserController::class, 'store'])->name('usuarios.store');
+    Route::get('/usuarios/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('usuarios.edit');
+    Route::post('/usuarios/{user}/update', [App\Http\Controllers\UserController::class, 'update'])->name('usuarios.update');
+    Route::post('/usuarios/{user}/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('usuarios.destroy');
+    Route::post('/usuarios/{user}/toggle', [App\Http\Controllers\UserController::class, 'toggleActivo'])->name('usuarios.toggle');
     Route::get('/categorias', function () {
         return '<h1>CRUD de Categorías</h1>';
     });
