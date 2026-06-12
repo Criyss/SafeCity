@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReporteController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reportes/crear', [ReporteController::class, 'create'])->name('reportes.create');
+    Route::post('/reportes', [ReporteController::class, 'store'])->name('reportes.store');
+});
 
 // Redirección inicial automática al Login
 Route::get('/', function () {
