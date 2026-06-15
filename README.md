@@ -1,59 +1,136 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SafeCity
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plataforma de geolocalización de incidencias urbanas en Bolivia. Permite a ciudadanos reportar incidencias (robos, baches, alumbrado, etc.) geolocalizadas en un mapa interactivo, y a supervisores y administradores gestionar el seguimiento de los reportes.
 
-## About Laravel
+## Tecnologías
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.2
+- Laravel 12
+- MySQL
+- Bootstrap 5
+- Leaflet.js (mapas)
+- XAMPP
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos previos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- XAMPP con PHP 8.2 y MySQL
+- Composer
+- Git
 
-## Learning Laravel
+## Instalación
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 1. Clonar el repositorio
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone https://github.com/tu-usuario/SafeCity.git
+cd SafeCity
+```
 
-## Laravel Sponsors
+O copiar la carpeta directamente en `C:\xampp\htdocs\SafeCity`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Instalar dependencias
 
-### Premium Partners
+```bash
+composer install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 3. Configurar el archivo de entorno
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Editar `.env` con los datos de la base de datos:
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=safecity
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Crear la base de datos
 
-## Security Vulnerabilities
+Abrir phpMyAdmin en `http://localhost/phpmyadmin` y crear una base de datos llamada `safecity`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Ejecutar migraciones y seeders
 
-## License
+```bash
+php artisan migrate --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Esto crea todas las tablas y carga los datos iniciales (usuarios de prueba, 16 categorías predefinidas).
+
+### 6. Iniciar el servidor
+
+Con XAMPP corriendo, acceder directamente a:
+
+```
+http://localhost/SafeCity/public
+```
+
+O usando el servidor de desarrollo de Laravel:
+
+```bash
+php artisan serve
+```
+
+Y acceder a `http://localhost:8000`.
+
+## Credenciales de prueba
+
+| Rol | Correo | Contraseña |
+|-----|--------|------------|
+| Administrador | admin@safecity.bo | password |
+| Supervisor | supervisor@safecity.bo | password |
+| Ciudadano | ciudadano@safecity.bo | password |
+
+## URLs principales
+
+| URL | Descripción | Acceso |
+|-----|-------------|--------|
+| `/login` | Inicio de sesión | Público |
+| `/register` | Registro de ciudadano | Público |
+| `/mapa-seguridad` | Mapa público de incidencias | Público |
+| `/dashboard` | Panel de estadísticas | Admin / Supervisor |
+| `/reportes` | Lista de reportes | Todos los usuarios |
+| `/reportes/crear` | Crear nuevo reporte | Todos los usuarios |
+| `/mapa` | Mapa con filtros (autenticado) | Todos los usuarios |
+| `/categorias` | Gestión de categorías | Administrador |
+| `/usuarios` | Gestión de usuarios | Administrador |
+
+## Roles del sistema
+
+- **Administrador**: acceso total — gestiona usuarios, categorías, reportes y puede cambiar estados.
+- **Supervisor**: visualiza el dashboard y puede cambiar el estado de los reportes.
+- **Ciudadano**: crea reportes y consulta el estado de los suyos.
+
+## Estructura principal
+
+```
+app/
+  Http/Controllers/
+    AuthController.php       # Login, logout, registro
+    DashboardController.php  # Estadísticas generales
+    ReporteController.php    # CRUD de reportes y cambio de estado
+    CategoriaController.php  # CRUD de categorías
+    UserController.php       # CRUD de usuarios
+    MapaController.php       # Mapa y endpoints JSON
+  Models/
+    User.php
+    Reporte.php
+    Categoria.php
+    EstadoReporte.php
+resources/views/
+  auth/           # Login y registro
+  dashboard/      # Panel principal
+  reportes/       # Lista, detalle y creación de reportes
+  categorias/     # CRUD de categorías
+  users/          # CRUD de usuarios
+  maps/           # Vista del mapa
+routes/
+  web.php         # Todas las rutas con middleware auth y rol
+```
