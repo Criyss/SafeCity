@@ -5,12 +5,34 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reporte;
 use App\Models\Categoria;
+use App\Models\EstadoReporte;
+use Illuminate\Support\Facades\Auth;
 
 class ReporteController extends Controller
 {
+    public function index()
+    {
+        if (Auth::user()->rol === 'ciudadano') {
+            $reportes = Reporte::with(['categoria'])
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->paginate(10);
+        } else {
+            $reportes = Reporte::with(['categoria', 'user'])
+                ->latest()
+                ->paginate(10);
+        }
+        return view('reportes.index', compact('reportes'));
+    }
+
+    public function show(Reporte $reporte)
+    {
+        $estados = $reporte->estados()->with('user')->latest()->get();
+        return view('reportes.show', compact('reporte', 'estados'));
+    }
+
     public function create()
     {
-        // Traemos las categorías para el select del formulario
         $categorias = Categoria::all();
         return view('reportes.create', compact('categorias'));
     }
@@ -18,33 +40,63 @@ class ReporteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'titulo' => 'required|string|max:255',
+            'titulo'       => 'required|string|max:255',
             'categoria_id' => 'required|exists:categorias,id',
-            'descripcion' => 'required|string',
-            'latitud' => 'required|numeric',
-            'longitud' => 'required|numeric',
-            'foto' => 'required|image|max:10240', // Máximo 2MB
+            'descripcion'  => 'required|string',
+            'latitud'      => 'required|numeric',
+            'longitud'     => 'required|numeric',
+            'foto'         => 'required|image|max:10240',
         ]);
 
         $base64String = null;
-
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $imageContent = file_get_contents($file->getRealPath());
             $mimeType = $file->getClientMimeType();
-            $base64String = 'data:' . $mimeType . ';base64,' . base64_encode($imageContent);
+            $base64String = 'data:'.$mimeType.';base64,'.base64_encode($imageContent);
         }
 
-        Reporte::create([
-            'user_id' => $request->user()->id,
-            'categoria_id' => $request->input('categoria_id'),
-            'titulo' => $request->input('titulo'),
-            'descripcion' => $request->input('descripcion'),
-            'latitud' => $request->input('latitud'),
-            'longitud' => $request->input('longitud'),
-            'foto_base64' => $base64String,
+        $reporte = Reporte::create([
+            'user_id'      => Auth::id(),
+            'categoria_id' => $request->categoria_id,
+            'titulo'       => $request->titulo,
+            'descripcion'  => $request->descripcion,
+            'latitud'      => $request->latitud,
+            'longitud'     => $request->longitud,
+            'foto_base64'  => $base64String,
+            'estado'       => 'Pendiente',
         ]);
 
-        return redirect()->route('reportes.create')->with('success', 'Reporte enviado correctamente con geolocalización.');
+        // Registrar estado inicial
+        EstadoReporte::create([
+            'reporte_id'     => $reporte->id,
+            'user_id'        => Auth::id(),
+            'estado_anterior'=> 'Nuevo',
+            'estado_nuevo'   => 'Pendiente',
+            'comentario'     => 'Reporte creado.',
+        ]);
+
+        return redirect('/reportes')->with('success', 'Reporte enviado correctamente.');
+    }
+
+    public function cambiarEstado(Request $request, Reporte $reporte)
+    {
+        $request->validate([
+            'estado_nuevo' => 'required|in:Pendiente,En revisión,En proceso,Resuelto,Cerrado',
+            'comentario'   => 'nullable|string',
+        ]);
+
+        EstadoReporte::create([
+            'reporte_id'      => $reporte->id,
+            'user_id'         => Auth::id(),
+            'estado_anterior' => $reporte->estado,
+            'estado_nuevo'    => $request->estado_nuevo,
+            'comentario'      => $request->comentario,
+        ]);
+
+        $reporte->estado = $request->estado_nuevo;
+        $reporte->save();
+
+        return redirect('/reportes/'.$reporte->id)->with('success', 'Estado actualizado correctamente.');
     }
 }

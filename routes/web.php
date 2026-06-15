@@ -45,15 +45,13 @@ Route::middleware(['auth', 'rol:administrador,supervisor'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 });
 
-// Rutas de todos los roles autenticados
-Route::middleware(['auth', 'rol:administrador,supervisor,ciudadano'])->group(function () {
-    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
-});
-
 // Rutas de reportes
 Route::middleware(['auth'])->group(function () {
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('/reportes/crear', [ReporteController::class, 'create'])->name('reportes.create');
     Route::post('/reportes', [ReporteController::class, 'store'])->name('reportes.store');
+    Route::get('/reportes/{reporte}', [ReporteController::class, 'show'])->name('reportes.show');
+    Route::post('/reportes/{reporte}/estado', [ReporteController::class, 'cambiarEstado'])->name('reportes.estado');
 });
 
 // Rutas del mapa

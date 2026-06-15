@@ -13,7 +13,8 @@ class Reporte extends Model
         'descripcion', 
         'latitud', 
         'longitud', 
-        'foto_base64'
+        'foto_base64',
+        'estado',
     ];
 
     public function user()
@@ -24,5 +25,10 @@ class Reporte extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
+    }
+
+    public function estados()
+    {
+        return $this->hasMany(EstadoReporte::class);
     }
 }
