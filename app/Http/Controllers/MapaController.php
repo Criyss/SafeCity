@@ -14,7 +14,7 @@ class MapaController extends Controller
     public function reportesJson()
     {
         $reportes = \App\Models\Reporte::with('categoria')
-            ->select('id', 'titulo', 'latitud', 'longitud', 'categoria_id', 'created_at')
+            ->select('id', 'titulo', 'latitud', 'longitud', 'categoria_id', 'estado')
             ->get()
             ->map(function($r) {
                 return [
@@ -22,6 +22,7 @@ class MapaController extends Controller
                     'lng'       => $r->longitud,
                     'titulo'    => $r->titulo,
                     'categoria' => $r->categoria ? $r->categoria->nombre : 'Sin categoría',
+                    'estado'    => $r->estado,
                 ];
             });
 
