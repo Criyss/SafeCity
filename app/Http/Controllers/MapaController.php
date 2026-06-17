@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Categoria;
 
 class MapaController extends Controller
 {
     public function index()
     {
-        return view('maps.mapa');
+        $categorias = Categoria::orderBy('nombre')->get();
+        return view('maps.mapa', compact('categorias'));
     }
 
     public function reportesJson()

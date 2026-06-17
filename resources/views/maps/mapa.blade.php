@@ -41,15 +41,9 @@
                 <label class="form-label">Categoría</label>
                 <select class="form-select" id="filtroCategoria">
                     <option value="">Todas</option>
-                    <option>Robo</option>
-                    <option>Vandalismo</option>
-                    <option>Accidente de tránsito</option>
-                    <option>Bache</option>
-                    <option>Basura</option>
-                    <option>Inundación</option>
-                    <option>Alumbrado defectuoso</option>
-                    <option>Zona insegura</option>
-                    <option>Emergencia</option>
+                    @foreach($categorias as $cat)
+                        <option value="{{ $cat->nombre }}">{{ $cat->nombre }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="mb-3">
