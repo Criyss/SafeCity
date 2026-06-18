@@ -40,12 +40,14 @@ class ReporteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'titulo'       => 'required|string|max:255',
-            'categoria_id' => 'required|exists:categorias,id',
-            'descripcion'  => 'required|string',
-            'latitud'      => 'required|numeric',
-            'longitud'     => 'required|numeric',
-            'foto'         => 'required|image|max:10240',
+            'titulo'        => 'required|string|max:255',
+            'categoria_id'  => 'required|exists:categorias,id',
+            'descripcion'   => 'required|string',
+            'departamento'  => 'required|in:La Paz,Cochabamba,Santa Cruz,Oruro,Potosí,Chuquisaca,Tarija,Beni,Pando',
+            'gravedad'      => 'required|in:Baja,Media,Alta,Crítica',
+            'latitud'       => 'required|numeric',
+            'longitud'      => 'required|numeric',
+            'foto'          => 'nullable|image|max:10240',
         ]);
 
         $base64String = null;
@@ -61,6 +63,8 @@ class ReporteController extends Controller
             'categoria_id' => $request->categoria_id,
             'titulo'       => $request->titulo,
             'descripcion'  => $request->descripcion,
+            'departamento' => $request->departamento,
+            'gravedad'     => $request->gravedad,
             'latitud'      => $request->latitud,
             'longitud'     => $request->longitud,
             'foto_base64'  => $base64String,
@@ -90,13 +94,4 @@ class ReporteController extends Controller
             'reporte_id'      => $reporte->id,
             'user_id'         => Auth::id(),
             'estado_anterior' => $reporte->estado,
-            'estado_nuevo'    => $request->estado_nuevo,
-            'comentario'      => $request->comentario,
-        ]);
-
-        $reporte->estado = $request->estado_nuevo;
-        $reporte->save();
-
-        return redirect('/reportes/'.$reporte->id)->with('success', 'Estado actualizado correctamente.');
-    }
-}
+            'esta

@@ -34,10 +34,32 @@
 
         <div class="card shadow-sm mb-3">
             <div class="card-body">
-                <form method="GET" action="/usuarios" class="d-flex gap-2">
-                    <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre o correo..." value="{{ $buscar ?? '' }}">
-                    <button type="submit" class="btn text-white" style="background-color: #1A3A5C;">Buscar</button>
-                    <a href="/usuarios" class="btn btn-outline-secondary">Limpiar</a>
+                <form method="GET" action="/usuarios" class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1">Buscar por nombre o correo</label>
+                        <input type="text" name="buscar" class="form-control form-control-sm" placeholder="Nombre o correo..." value="{{ $buscar ?? '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Rol</label>
+                        <select name="rol" class="form-select form-select-sm">
+                            <option value="">Todos los roles</option>
+                            <option value="administrador" {{ ($filtroRol ?? '') === 'administrador' ? 'selected' : '' }}>Administrador</option>
+                            <option value="supervisor"    {{ ($filtroRol ?? '') === 'supervisor'    ? 'selected' : '' }}>Supervisor</option>
+                            <option value="ciudadano"     {{ ($filtroRol ?? '') === 'ciudadano'     ? 'selected' : '' }}>Ciudadano</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Estado</label>
+                        <select name="estado" class="form-select form-select-sm">
+                            <option value="">Todos</option>
+                            <option value="1" {{ ($filtroEst ?? '') === '1' ? 'selected' : '' }}>Activo</option>
+                            <option value="0" {{ ($filtroEst ?? '') === '0' ? 'selected' : '' }}>Bloqueado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm text-white" style="background-color: #1A3A5C;">Buscar</button>
+                        <a href="/usuarios" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -64,35 +86,4 @@
                             </td>
                             <td>
                                 @if($usuario->is_active)
-                                    <span class="badge bg-success">Activo</span>
-                                @else
-                                    <span class="badge bg-danger">Bloqueado</span>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="/usuarios/{{ $usuario->id }}/edit" class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form action="/usuarios/{{ $usuario->id }}/toggle" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-warning">
-                                        {{ $usuario->is_active ? 'Bloquear' : 'Activar' }}
-                                    </button>
-                                </form>
-                                <form action="/usuarios/{{ $usuario->id }}/delete" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">No hay usuarios</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                {{ $usuarios->links() }}
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+                                    <span class="badge bg-success">Activo

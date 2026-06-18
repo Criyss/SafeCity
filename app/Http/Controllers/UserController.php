@@ -10,13 +10,26 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $buscar = $request->get('buscar');
-        $usuarios = User::when($buscar, function($q) use ($buscar) {
-            $q->where('name', 'LIKE', '%'.$buscar.'%')
-              ->orWhere('email', 'LIKE', '%'.$buscar.'%');
-        })->paginate(10);
+        $buscar    = $request->get('buscar');
+        $filtroRol = $request->get('rol');
+        $filtroEst = $request->get('estado');
 
-        return view('users.index', compact('usuarios', 'buscar'));
+        $usuarios = User::when($buscar, function($q) use ($buscar) {
+                $q->where(function($q2) use ($buscar) {
+                    $q2->where('name', 'LIKE', '%'.$buscar.'%')
+                       ->orWhere('email', 'LIKE', '%'.$buscar.'%');
+                });
+            })
+            ->when($filtroRol, function($q) use ($filtroRol) {
+                $q->where('rol', $filtroRol);
+            })
+            ->when($filtroEst !== null && $filtroEst !== '', function($q) use ($filtroEst) {
+                $q->where('is_active', $filtroEst);
+            })
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('users.index', compact('usuarios', 'buscar', 'filtroRol', 'filtroEst'));
     }
 
     public function create()
@@ -59,23 +72,4 @@ class UserController extends Controller
 
         $user->update([
             'name'  => $request->name,
-            'email' => $request->email,
-            'rol'   => $request->rol,
-        ]);
-
-        return redirect('/usuarios')->with('success', 'Usuario actualizado correctamente.');
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect('/usuarios')->with('success', 'Usuario eliminado correctamente.');
-    }
-
-    public function toggleActivo(User $user)
-    {
-        $user->is_active = !$user->is_active;
-        $user->save();
-        return redirect('/usuarios')->with('success', 'Estado del usuario actualizado.');
-    }
-}
+            'email' => $request

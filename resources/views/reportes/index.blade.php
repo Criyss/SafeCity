@@ -39,6 +39,8 @@
                         <tr>
                             <th>Título</th>
                             <th>Categoría</th>
+                            <th>Departamento</th>
+                            <th>Gravedad</th>
                             <th>Estado</th>
                             <th>Fecha</th>
                             <th>Acciones</th>
@@ -46,9 +48,15 @@
                     </thead>
                     <tbody>
                         @forelse($reportes as $reporte)
+                        @php
+                            $grav = $reporte->gravedad ?? 'Media';
+                            $gc = ['Baja'=>'success','Media'=>'warning','Alta'=>'danger','Crítica'=>'dark'][$grav] ?? 'secondary';
+                        @endphp
                         <tr>
                             <td>{{ $reporte->titulo }}</td>
                             <td>{{ $reporte->categoria->nombre ?? 'Sin categoría' }}</td>
+                            <td>{{ $reporte->departamento ?? '—' }}</td>
+                            <td><span class="badge bg-{{ $gc }}">{{ $grav }}</span></td>
                             <td>
                                 @php
                                     $colores = [
@@ -64,19 +72,4 @@
                             </td>
                             <td>{{ $reporte->created_at->format('d/m/Y') }}</td>
                             <td>
-                                <a href="/reportes/{{ $reporte->id }}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">No hay reportes aún</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                {{ $reportes->links('pagination::bootstrap-5') }}
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+                                <a href="/reportes/{{ $reporte->id }}" class=

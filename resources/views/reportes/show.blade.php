@@ -1,3 +1,4 @@
+{{-- Detalle del reporte. Cambio de estado + historial: Keyra --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,13 +7,14 @@
     <title>Safe City — Detalle del Reporte</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
+
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">Safe City</a>
+            <a class="navbar-brand fw-bold" href="#">🛡️ Safe City</a>
             <div class="d-flex gap-3">
                 <a href="/reportes" class="text-white text-decoration-none">Reportes</a>
-                <a href="/mapa" class="text-white text-decoration-none">Mapa</a>
+                <a href="/mapa"     class="text-white text-decoration-none">Mapa</a>
                 <form action="/logout" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-link text-white text-decoration-none p-0">Cerrar sesión</button>
@@ -28,85 +30,66 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
+        {{-- Datos del reporte --}}
         <div class="card shadow-sm mb-4">
+            <div class="card-header text-white" style="background-color: #1A3A5C;">
+                <h5 class="mb-0">{{ $reporte->titulo }}</h5>
+            </div>
             <div class="card-body">
-                <h4 class="fw-bold mb-3" style="color: #1A3A5C;">{{ $reporte->titulo }}</h4>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Categoría:</strong> {{ $reporte->categoria->nombre ?? 'Sin categoría' }}</p>
-                        <p><strong>Descripción:</strong> {{ $reporte->descripcion }}</p>
-                        <p><strong>Ubicación:</strong> {{ $reporte->latitud }}, {{ $reporte->longitud }}</p>
-                        <p><strong>Fecha:</strong> {{ $reporte->created_at->format('d/m/Y H:i') }}</p>
-                        <p><strong>Estado actual:</strong>
+                        <p><strong>Categoría:</strong> {{ $reporte->categoria->nombre ?? '—' }}</p>
+                        <p><strong>Departamento:</strong> {{ $reporte->departamento ?? '—' }}</p>
+                        <p>
+                            <strong>Gravedad:</strong>
                             @php
-                                $colores = [
-                                    'Pendiente'   => 'warning',
-                                    'En revisión' => 'info',
-                                    'En proceso'  => 'primary',
-                                    'Resuelto'    => 'success',
-                                    'Cerrado'     => 'secondary',
-                                ];
-                                $color = $colores[$reporte->estado] ?? 'secondary';
+                                $colorG = ['Baja'=>'success','Media'=>'warning','Alta'=>'danger','Crítica'=>'dark'][$reporte->gravedad ?? 'Media'] ?? 'secondary';
                             @endphp
-                            <span class="badge bg-{{ $color }}">{{ $reporte->estado ?? 'Pendiente' }}</span>
+                            <span class="badge bg-{{ $colorG }}">{{ $reporte->gravedad ?? '—' }}</span>
+                        </p>
+                        <p><strong>Descripción:</strong> {{ $reporte->descripcion }}</p>
+                        <p><strong>GPS:</strong> {{ $reporte->latitud }}, {{ $reporte->longitud }}</p>
+                        <p><strong>Reportado por:</strong> {{ $reporte->user->name ?? '—' }}</p>
+                        <p><strong>Fecha:</strong> {{ $reporte->created_at->format('d/m/Y H:i') }}</p>
+                        <p>
+                            <strong>Estado:</strong>
+                            @php
+                                $colorE = ['Pendiente'=>'warning','En revisión'=>'info','En proceso'=>'primary','Resuelto'=>'success','Cerrado'=>'secondary'][$reporte->estado] ?? 'secondary';
+                            @endphp
+                            <span class="badge bg-{{ $colorE }}">{{ $reporte->estado }}</span>
                         </p>
                     </div>
                     <div class="col-md-6">
                         @if($reporte->foto_base64)
-                            <img src="{{ $reporte->foto_base64 }}" class="img-fluid rounded" alt="Foto del reporte">
+                            <img src="{{ $reporte->foto_base64 }}" class="img-fluid rounded shadow-sm" alt="Foto de evidencia">
                         @else
-                            <p class="text-muted">Sin fotografía</p>
+                            <div class="p-4 text-center text-muted border rounded">Sin fotografía</div>
                         @endif
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- CAMBIAR ESTADO - solo admin y supervisor --}}
+        {{-- Formulario de cambio de estado — solo admin y supervisor lo ven --}}
         @if(auth()->user()->rol !== 'ciudadano')
         <div class="card shadow-sm mb-4">
+            <div class="card-header" style="background-color: #EBF5FB; border-left: 4px solid #1A3A5C;">
+                <h6 class="mb-0 fw-bold" style="color: #1A3A5C;">Cambiar Estado</h6>
+            </div>
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: #1A3A5C;">Cambiar Estado</h5>
+                {{-- @csrf protege el formulario contra ataques CSRF --}}
                 <form action="/reportes/{{ $reporte->id }}/estado" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">Nuevo estado</label>
+                        <label class="form-label fw-semibold">Nuevo Estado</label>
                         <select name="estado_nuevo" class="form-select" required>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="En revisión">En revisión</option>
-                            <option value="En proceso">En proceso</option>
-                            <option value="Resuelto">Resuelto</option>
-                            <option value="Cerrado">Cerrado</option>
+                            <option value="Pendiente"   {{ $reporte->estado === 'Pendiente'   ? 'selected' : '' }}>Pendiente</option>
+                            <option value="En revisión" {{ $reporte->estado === 'En revisión' ? 'selected' : '' }}>En revisión</option>
+                            <option value="En proceso"  {{ $reporte->estado === 'En proceso'  ? 'selected' : '' }}>En proceso</option>
+                            <option value="Resuelto"    {{ $reporte->estado === 'Resuelto'    ? 'selected' : '' }}>Resuelto</option>
+                            <option value="Cerrado"     {{ $reporte->estado === 'Cerrado'     ? 'selected' : '' }}>Cerrado</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Comentario (opcional)</label>
-                        <textarea name="comentario" class="form-control" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn text-white" style="background-color: #1A3A5C;">Guardar cambio</button>
-                </form>
-            </div>
-        </div>
-        @endif
-
-        {{-- HISTORIAL DE ESTADOS --}}
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: #1A3A5C;">Historial de Estados</h5>
-                @forelse($estados as $estado)
-                <div class="border-bottom pb-2 mb-2">
-                    <span class="badge bg-secondary">{{ $estado->estado_anterior }}</span>
-                    → <span class="badge bg-primary">{{ $estado->estado_nuevo }}</span>
-                    <small class="text-muted ms-2">por {{ $estado->user->name }} — {{ $estado->created_at->format('d/m/Y H:i') }}</small>
-                    @if($estado->comentario)
-                        <p class="mb-0 mt-1 text-muted">{{ $estado->comentario }}</p>
-                    @endif
-                </div>
-                @empty
-                <p class="text-muted">Sin historial de cambios.</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+                        <label class="form-label fw-semibold">Comentario (opcional)</label>
+                        <textarea name="comentario" class="form-control" rows="2" placeholder="Ej: Se envió al equipo de mantenimiento..."></textarea>

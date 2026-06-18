@@ -6,10 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Categoria extends Model
 {
-    protected $fillable = ['nombre'];
+    protected $fillable = ['nombre', 'descripcion'];
 
     public function reportes()
     {
-        return $this->hasMany(Reporte::class);
-    }
-}
+        return $this->hasMany(Reporte::

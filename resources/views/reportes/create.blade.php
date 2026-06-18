@@ -1,3 +1,4 @@
+{{-- Formulario de nuevo reporte con selector GPS en mapa Leaflet --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,93 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Reporte - Safe City</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        #mapaSeleccion { height: 320px; border-radius: 8px; border: 1px solid #dee2e6; }
+    </style>
 </head>
 <body class="bg-light">
-<div class="container mt-5">
-    <div class="card shadow-sm max-w-md mx-auto" style="max-width: 600px;">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Reportar Nueva Incidencia</h4>
+
+    <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">🛡️ Safe City</a>
+            <div class="d-flex gap-3">
+                <a href="/reportes" class="text-white text-decoration-none">Reportes</a>
+                <a href="/mapa"     class="text-white text-decoration-none">Mapa</a>
+                <form action="/logout" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-link text-white text-decoration-none p-0">Cerrar sesión</button>
+                </form>
+            </div>
         </div>
-        <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-            <form action="{{ route('reportes.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="mb-3">
-                    <label>Título del Reporte</label>
-                    <input type="text" name="titulo" class="form-control" required>
-                </div>
+    </nav>
 
-                <div class="mb-3">
-                    <label>Categoría</label>
-                    <select name="categoria_id" class="form-select" required>
-                        <option value="">Selecciona una categoría...</option>
-                        @foreach($categorias as $categoria)
-                            <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header text-white" style="background-color: #1A3A5C;">
+                        <h5 class="mb-0">Reportar Nueva Incidencia</h5>
+                    </div>
+                    <div class="card-body">
 
-                <div class="mb-3">
-                    <label>Descripción detallada</label>
-                    <textarea name="descripcion" class="form-control" rows="3" required></textarea>
-                </div>
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-                <div class="mb-3">
-                    <label>Evidencia Fotográfica</label>
-                    <input type="file" name="foto" class="form-control" accept="image/*" required>
-                </div>
+                        {{-- @csrf genera el token de seguridad que Laravel verifica al recibir el formulario --}}
+                        <form action="{{ route('reportes.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
 
-                <input type="hidden" name="latitud" id="latitud" value="-17.3923">
-<input type="hidden" name="longitud" id="longitud" value="-66.1536">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                                <input type="text" name="titulo" class="form-control" value="{{ old('titulo') }}" placeholder="Ej: Bache en Av. Principal" required>
+                            </div>
 
-<div class="d-grid gap-2">
-    <button type="submit" class="btn btn-primary" id="btnSubmit">
-        Enviar Reporte (Modo Prueba)
-    </button>
-</div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-function obtenerUbicacion() {
-    const status = document.getElementById('gpsStatus');
-    const btnSubmit = document.getElementById('btnSubmit');
-
-    if (!navigator.geolocation) {
-        status.textContent = "La geolocalización no es soportada por tu navegador.";
-        return;
-    }
-
-    status.textContent = "Localizando...";
-    status.className = "text-warning mt-2 d-block text-center";
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            document.getElementById('latitud').value = position.coords.latitude;
-            document.getElementById('longitud').value = position.coords.longitude;
-            status.textContent = "✅ Ubicación capturada con éxito.";
-            status.className = "text-success mt-2 d-block text-center";
-            btnSubmit.disabled = false;
-        },
-        (error) => {
-            status.textContent = "❌ Error al obtener ubicación. Asegúrate de dar permisos.";
-            status.className = "text-danger mt-2 d-block text-center";
-        }
-    );
-}
-</script>
-</body>
-</html>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Categoría <span class="text-danger">*</span></label>
+                                    {{-- Categorías dinámicas desde la BD --}}
+                                    <select name="categoria_id" class="form-select" required>
+                                        <option value="">Selecciona...</option>
+                                        @foreach($categorias as $categoria)
+                                            <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                                {{ $categoria->nombre }}
+                                            </option>
+                               
