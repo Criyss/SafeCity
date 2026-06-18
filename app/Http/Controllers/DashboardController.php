@@ -37,4 +37,15 @@ class DashboardController extends Controller
         $anio        = now()->year;
         $mensualData = [];
         for ($mes = 1; $mes <= 12; $mes++) {
-     
+            $mensualData[] = Reporte::whereYear('created_at', $anio)
+                                    ->whereMonth('created_at', $mes)
+                                    ->count();
+        }
+
+        return view('dashboard.index', compact(
+            'totalUsuarios', 'totalReportes', 'resueltos', 'pendientes',
+            'ultimosReportes', 'categoriaLabels', 'categoriaData',
+            'departamentoData', 'mensualData'
+        ));
+    }
+}
