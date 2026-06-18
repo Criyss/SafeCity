@@ -31,4 +31,6 @@ class Reporte extends Model
 
     public function estados()
     {
-        return $this->
+        return $this->hasMany(EstadoReporte::class);
+    }
+}

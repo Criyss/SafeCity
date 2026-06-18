@@ -10,4 +10,6 @@ class Categoria extends Model
 
     public function reportes()
     {
-        return $this->hasMany(Reporte::
+        return $this->hasMany(Reporte::class);
+    }
+}
