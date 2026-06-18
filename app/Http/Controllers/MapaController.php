@@ -44,4 +44,23 @@ class MapaController extends Controller
     }
 
     // Devuelve reportes en JSON para el mapa público
-  
+    public function reportesPublicoJson()
+    {
+        $reportes = Reporte::with('categoria')
+            ->select('id', 'titulo', 'latitud', 'longitud', 'categoria_id', 'estado', 'departamento', 'gravedad')
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'lat'          => $r->latitud,
+                    'lng'          => $r->longitud,
+                    'titulo'       => $r->titulo,
+                    'tipo'         => $r->categoria ? $r->categoria->nombre : 'Sin categoría',
+                    'estado'       => $r->estado,
+                    'departamento' => $r->departamento,
+                    'gravedad'     => $r->gravedad,
+                ];
+            });
+
+        return response()->json($reportes);
+    }
+}
