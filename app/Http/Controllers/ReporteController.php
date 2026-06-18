@@ -71,13 +71,13 @@ class ReporteController extends Controller
             'estado'       => 'Pendiente',
         ]);
 
-        // Registrar estado inicial
+        // Registrar estado inicial en el historial
         EstadoReporte::create([
-            'reporte_id'     => $reporte->id,
-            'user_id'        => Auth::id(),
-            'estado_anterior'=> 'Nuevo',
-            'estado_nuevo'   => 'Pendiente',
-            'comentario'     => 'Reporte creado.',
+            'reporte_id'      => $reporte->id,
+            'user_id'         => Auth::id(),
+            'estado_anterior' => 'Nuevo',
+            'estado_nuevo'    => 'Pendiente',
+            'comentario'      => 'Reporte creado.',
         ]);
 
         return redirect('/reportes')->with('success', 'Reporte enviado correctamente.');
@@ -90,8 +90,17 @@ class ReporteController extends Controller
             'comentario'   => 'nullable|string',
         ]);
 
+        // Guarda el cambio de estado en el historial
         EstadoReporte::create([
             'reporte_id'      => $reporte->id,
             'user_id'         => Auth::id(),
             'estado_anterior' => $reporte->estado,
-            'esta
+            'estado_nuevo'    => $request->estado_nuevo,
+            'comentario'      => $request->comentario,
+        ]);
+
+        $reporte->update(['estado' => $request->estado_nuevo]);
+
+        return redirect()->back()->with('success', 'Estado actualizado correctamente.');
+    }
+}
