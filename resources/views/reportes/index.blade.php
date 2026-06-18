@@ -72,4 +72,19 @@
                             </td>
                             <td>{{ $reporte->created_at->format('d/m/Y') }}</td>
                             <td>
-                                <a href="/reportes/{{ $reporte->id }}" class=
+                                <a href="/reportes/{{ $reporte->id }}" class="btn btn-sm btn-outline-primary">Ver</a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay reportes aún.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                {{ $reportes->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

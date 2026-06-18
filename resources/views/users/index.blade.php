@@ -86,4 +86,35 @@
                             </td>
                             <td>
                                 @if($usuario->is_active)
-                                    <span class="badge bg-success">Activo
+                                    <span class="badge bg-success">Activo</span>
+                                @else
+                                    <span class="badge bg-danger">Bloqueado</span>
+                                @endif
+                            </td>
+                            <td class="d-flex gap-1 flex-wrap">
+                                <a href="/usuarios/{{ $usuario->id }}/edit" class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form action="/usuarios/{{ $usuario->id }}/toggle" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                                        {{ $usuario->is_active ? 'Bloquear' : 'Activar' }}
+                                    </button>
+                                </form>
+                                <form action="/usuarios/{{ $usuario->id }}/delete" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                {{ $usuarios->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

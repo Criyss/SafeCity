@@ -72,4 +72,24 @@ class UserController extends Controller
 
         $user->update([
             'name'  => $request->name,
-            'email' => $request
+            'email' => $request->email,
+            'rol'   => $request->rol,
+        ]);
+
+        return redirect('/usuarios')->with('success', 'Usuario actualizado correctamente.');
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return redirect('/usuarios')->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    // Activa o bloquea al usuario
+    public function toggleActivo(User $user)
+    {
+        $user->update(['is_active' => !$user->is_active]);
+        $msg = $user->is_active ? 'Usuario activado.' : 'Usuario bloqueado.';
+        return redirect('/usuarios')->with('success', $msg);
+    }
+}
