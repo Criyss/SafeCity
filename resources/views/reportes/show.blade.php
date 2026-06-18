@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safe City — Detalle del Reporte</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">🛡️ Safe City</a>
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-fill-check me-2"></i>Safe City</a>
             <div class="d-flex gap-3">
                 <a href="/reportes" class="text-white text-decoration-none">Reportes</a>
                 <a href="/mapa"     class="text-white text-decoration-none">Mapa</a>
                 <form action="/logout" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-link text-white text-decoration-none p-0">Cerrar sesión</button>
+                    <button type="submit" class="btn btn-link text-white text-decoration-none p-0"><i class="bi bi-box-arrow-right me-1"></i>Salir</button>
                 </form>
             </div>
         </div>

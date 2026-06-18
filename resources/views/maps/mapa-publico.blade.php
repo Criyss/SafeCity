@@ -11,11 +11,12 @@
         #map     { height: calc(100vh - 110px); }
         #sidebar { width: 250px; min-width: 250px; background: white; box-shadow: 2px 0 5px rgba(0,0,0,0.1); padding: 20px; overflow-y: auto; max-height: calc(100vh - 110px); }
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">🛡️ Safe City</a>
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-fill-check me-2"></i>Safe City</a>
             <div class="d-flex gap-3">
                 <a href="/mapa-seguridad" class="text-white text-decoration-none">Mapa Público</a>
                 <a href="/login"    class="btn btn-outline-light btn-sm">Iniciar sesión</a>
