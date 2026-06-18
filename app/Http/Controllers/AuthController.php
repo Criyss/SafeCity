@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -21,6 +23,16 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Throttle: máx 5 intentos por IP en 60 segundos
+        $throttleKey = Str::lower($request->input('email')).'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors([
+                'email' => "Demasiados intentos fallidos. Inténtalo de nuevo en {$seconds} segundos.",
+            ]);
+        }
+
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
@@ -28,12 +40,14 @@ class AuthController extends Controller
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+                RateLimiter::hit($throttleKey);
 
                 return back()->withErrors([
                     'email' => 'Tu cuenta ha sido bloqueada.',
                 ]);
             }
 
+            RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
             if ($user->rol === 'administrador') {
@@ -44,6 +58,8 @@ class AuthController extends Controller
 
             return redirect()->intended('/reportes');
         }
+
+        RateLimiter::hit($throttleKey, 60);
 
         return back()->withErrors([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
@@ -60,26 +76,4 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-            'rol' => 'ciudadano',
-            'is_active' => 1,
-        ]);
-
-        return redirect()->route('login')->with('success', 'Registro exitoso. Por favor inicia sesión.');
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('login');
-    }
-}
+            'password' => ['requi

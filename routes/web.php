@@ -51,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reportes/crear', [ReporteController::class, 'create'])->name('reportes.create');
     Route::post('/reportes', [ReporteController::class, 'store'])->name('reportes.store');
     Route::get('/reportes/{reporte}', [ReporteController::class, 'show'])->name('reportes.show');
+    Route::get('/reportes/{reporte}/edit', [ReporteController::class, 'edit'])->name('reportes.edit');
+    Route::post('/reportes/{reporte}/update', [ReporteController::class, 'update'])->name('reportes.update');
     Route::post('/reportes/{reporte}/estado', [ReporteController::class, 'cambiarEstado'])->name('reportes.estado');
 });
 
@@ -58,6 +60,4 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/mapa', [App\Http\Controllers\MapaController::class, 'index'])->middleware('auth');
 Route::get('/mapa/reportes', [App\Http\Controllers\MapaController::class, 'reportesJson'])->middleware('auth');
 
-// Rutas del mapa público para turistas
-Route::get('/mapa-seguridad', [App\Http\Controllers\MapaController::class, 'mapaPublico']);
-Route::get('/mapa-seguridad/reportes', [App\Http\Controllers\MapaController::class, 'reportesPublicoJson']);
+// Rutas del mapa público p

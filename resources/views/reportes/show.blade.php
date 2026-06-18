@@ -13,9 +13,16 @@
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-fill-check me-2"></i>Safe City</a>
-            <div class="d-flex gap-3">
-                <a href="/reportes" class="text-white text-decoration-none">Reportes</a>
-                <a href="/mapa"     class="text-white text-decoration-none">Mapa</a>
+            <div class="d-flex gap-3 align-items-center">
+                <a href="/mapa" class="text-white text-decoration-none"><i class="bi bi-map me-1"></i>Mapa</a>
+                @if(auth()->user()->rol !== 'ciudadano')
+                    <a href="/dashboard" class="text-white text-decoration-none"><i class="bi bi-bar-chart me-1"></i>Dashboard</a>
+                @endif
+                <a href="/reportes" class="text-white text-decoration-none"><i class="bi bi-file-earmark-text me-1"></i>Reportes</a>
+                @if(auth()->user()->rol === 'administrador')
+                    <a href="/usuarios"   class="text-white text-decoration-none"><i class="bi bi-people me-1"></i>Usuarios</a>
+                    <a href="/categorias" class="text-white text-decoration-none"><i class="bi bi-tags me-1"></i>Categorías</a>
+                @endif
                 <form action="/logout" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-link text-white text-decoration-none p-0"><i class="bi bi-box-arrow-right me-1"></i>Salir</button>
