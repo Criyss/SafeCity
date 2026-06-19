@@ -6,13 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safe City — Mapa Nacional</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    {{-- Leaflet CSS: estilos del mapa --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         #map     { height: calc(100vh - 56px); }
         #sidebar { width: 270px; min-width: 270px; background: white; box-shadow: 2px 0 5px rgba(0,0,0,0.1); padding: 20px; overflow-y: auto; max-height: calc(100vh - 56px); }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
@@ -113,4 +112,108 @@
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
     <script>
-        // Inicializar mapa centrado en Bolivia (sin API
+        // Inicializar mapa centrado en Bolivia (sin API key, tiles gratuitos)
+        const map = L.map('map').setView([-16.5, -64.5], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Color según gravedad del reporte
+        function colorGravedad(gravedad) {
+            const colores = { 'Baja': '#27AE60', 'Media': '#F39C12', 'Alta': '#E67E22', 'Crítica': '#C0392B' };
+            return colores[gravedad] || '#2980B9';
+        }
+
+        let todosReportes = [];
+        let marcadores    = [];
+        let heatLayer     = null;
+
+        // Obtener reportes del endpoint JSON
+        fetch('/mapa/reportes')
+            .then(r => r.json())
+            .then(data => {
+                todosReportes = data;
+                renderMarcadores(todosReportes);
+            })
+            .catch(() => console.log('No se pudieron cargar los reportes'));
+
+        function renderMarcadores(reportes) {
+            // Limpiar marcadores anteriores
+            marcadores.forEach(m => map.removeLayer(m));
+            marcadores = [];
+            if (heatLayer) map.removeLayer(heatLayer);
+
+            const heatData = [];
+
+            reportes.forEach(r => {
+                if (!r.lat || !r.lng) return;
+
+                // Marcador circular con color según gravedad
+                const circle = L.circleMarker([r.lat, r.lng], {
+                    radius: 8,
+                    fillColor: colorGravedad(r.gravedad),
+                    color: '#fff',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.85
+                }).addTo(map);
+
+                circle.bindPopup(
+                    `<b>${r.titulo}</b><br>
+                     <span class="text-muted">Categoría:</span> ${r.categoria}<br>
+                     <span class="text-muted">Estado:</span> ${r.estado}<br>
+                     <span class="text-muted">Departamento:</span> ${r.departamento}<br>
+                     <span class="text-muted">Gravedad:</span> ${r.gravedad}`
+                );
+
+                marcadores.push(circle);
+                heatData.push([r.lat, r.lng, 0.8]);
+            });
+
+            // Heatmap
+            if (heatData.length > 0) {
+                heatLayer = L.heatLayer(heatData, { radius: 30, blur: 20, maxZoom: 10 });
+                if (document.getElementById('toggleHeatmap').checked) {
+                    heatLayer.addTo(map);
+                }
+            }
+
+            document.getElementById('contador').textContent =
+                reportes.length > 0 ? `Mostrando ${reportes.length} reporte(s)` : 'Sin resultados';
+        }
+
+        function aplicarFiltros() {
+            const cat  = document.getElementById('filtroCategoria').value;
+            const dep  = document.getElementById('filtroDepartamento').value;
+            const est  = document.getElementById('filtroEstado').value;
+            const grav = document.getElementById('filtroGravedad').value;
+
+            const filtrados = todosReportes.filter(r =>
+                (!cat  || r.categoria    === cat)  &&
+                (!dep  || r.departamento === dep)  &&
+                (!est  || r.estado       === est)  &&
+                (!grav || r.gravedad     === grav)
+            );
+            renderMarcadores(filtrados);
+        }
+
+        function limpiarFiltros() {
+            ['filtroCategoria','filtroDepartamento','filtroEstado','filtroGravedad'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            renderMarcadores(todosReportes);
+        }
+
+        // Toggle heatmap
+        document.getElementById('toggleHeatmap').addEventListener('change', function() {
+            if (!heatLayer) return;
+            if (this.checked) {
+                heatLayer.addTo(map);
+            } else {
+                map.removeLayer(heatLayer);
+            }
+        });
+    </script>
+</body>
+</html>
