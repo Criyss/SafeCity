@@ -32,10 +32,10 @@
     </nav>
 
     <div class="container py-4">
-        <a href="/reportes" class="btn btn-outline-secondary mb-3">← Volver</a>
+        <a href="/reportes" class="btn btn-outline-secondary mb-3"><i class="bi bi-arrow-left me-1"></i>Volver</a>
 
         @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}</div>
         @endif
 
         {{-- Datos del reporte --}}
@@ -71,7 +71,9 @@
                         @if($reporte->foto_base64)
                             <img src="{{ $reporte->foto_base64 }}" class="img-fluid rounded shadow-sm" alt="Foto de evidencia">
                         @else
-                            <div class="p-4 text-center text-muted border rounded">Sin fotografía</div>
+                            <div class="p-4 text-center text-muted border rounded">
+                                <i class="bi bi-image fs-2 d-block mb-2"></i>Sin fotografía
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -82,10 +84,9 @@
         @if(auth()->user()->rol !== 'ciudadano')
         <div class="card shadow-sm mb-4">
             <div class="card-header" style="background-color: #EBF5FB; border-left: 4px solid #1A3A5C;">
-                <h6 class="mb-0 fw-bold" style="color: #1A3A5C;">Cambiar Estado</h6>
+                <h6 class="mb-0 fw-bold" style="color: #1A3A5C;"><i class="bi bi-arrow-repeat me-2"></i>Cambiar Estado</h6>
             </div>
             <div class="card-body">
-                {{-- @csrf protege el formulario contra ataques CSRF --}}
                 <form action="/reportes/{{ $reporte->id }}/estado" method="POST">
                     @csrf
                     <div class="mb-3">
@@ -101,3 +102,48 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Comentario (opcional)</label>
                         <textarea name="comentario" class="form-control" rows="2" placeholder="Ej: Se envió al equipo de mantenimiento..."></textarea>
+                    </div>
+                    <button type="submit" class="btn text-white" style="background-color: #1A3A5C;">
+                        <i class="bi bi-save me-1"></i>Guardar cambio
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
+
+        {{-- Historial de estados --}}
+        <div class="card shadow-sm">
+            <div class="card-header" style="background-color: #EBF5FB; border-left: 4px solid #1A3A5C;">
+                <h6 class="mb-0 fw-bold" style="color: #1A3A5C;"><i class="bi bi-clock-history me-2"></i>Historial de Estados</h6>
+            </div>
+            <div class="card-body">
+                @forelse($estados as $est)
+                    <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+                        <div class="text-center" style="min-width:40px;">
+                            <i class="bi bi-circle-fill" style="color: #1A3A5C;"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1">
+                                <span class="fw-semibold">{{ $est->user->name ?? '—' }}</span>
+                                cambió de
+                                <span class="badge bg-secondary">{{ $est->estado_anterior }}</span>
+                                a
+                                @php
+                                    $ce = ['Pendiente'=>'warning','En revisión'=>'info','En proceso'=>'primary','Resuelto'=>'success','Cerrado'=>'secondary'][$est->estado_nuevo] ?? 'secondary';
+                                @endphp
+                                <span class="badge bg-{{ $ce }}">{{ $est->estado_nuevo }}</span>
+                            </p>
+                            @if($est->comentario)
+                                <p class="text-muted small mb-1"><i class="bi bi-chat-left-text me-1"></i>{{ $est->comentario }}</p>
+                            @endif
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ $est->created_at->format('d/m/Y H:i') }}</small>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-muted text-center py-3"><i class="bi bi-inbox me-2"></i>Sin historial aún.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</body>
+</html>

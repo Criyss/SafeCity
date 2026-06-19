@@ -6,13 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safe City — Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    {{-- Chart.js para las 3 gráficas estadísticas --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body { background-color: #F2F3F4; }
         .kpi-card { border-left: 4px solid #1A3A5C; }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-dark" style="background-color: #1A3A5C;">
@@ -36,7 +35,7 @@
 
     <div class="container-fluid py-4 px-4">
 
-        {{-- 4 tarjetas KPI con contadores reales de la BD --}}
+        {{-- 4 tarjetas KPI --}}
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card kpi-card shadow-sm">
@@ -100,7 +99,7 @@
             </div>
         </div>
 
-        {{-- Tabla con los últimos 10 reportes --}}
+        {{-- Tabla últimos 10 reportes --}}
         <div class="card shadow-sm">
             <div class="card-body">
                 <h6 class="fw-bold mb-3" style="color: #1A3A5C;">Últimos 10 Reportes</h6>
@@ -137,12 +136,70 @@
     </div>
 
     <script>
-        // Pastel: reportes por categoría
-        // $categoriaLabels y $categoriaData vienen del DashboardController
+        // ── Gráfica 1: Pastel por categoría ──────────────────────────────────
         new Chart(document.getElementById('graficaPastel'), {
             type: 'pie',
             data: {
                 labels: {!! json_encode($categoriaLabels) !!},
                 datasets: [{
                     data: {!! json_encode($categoriaData) !!},
-                    backgroundColor: ['#1
+                    backgroundColor: [
+                        '#1A3A5C','#2E75B6','#27AE60','#E67E22','#E74C3C',
+                        '#8E44AD','#16A085','#F39C12','#2C3E50','#D35400',
+                        '#1ABC9C','#C0392B','#7F8C8D','#2980B9','#6C3483','#117A65'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+            }
+        });
+
+        // ── Gráfica 2: Barras por departamento ───────────────────────────────
+        new Chart(document.getElementById('graficaBarras'), {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($departamentoLabels) !!},
+                datasets: [{
+                    label: 'Reportes',
+                    data: {!! json_encode($departamentoData) !!},
+                    backgroundColor: '#2E75B6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+
+        // ── Gráfica 3: Líneas de tendencia mensual ───────────────────────────
+        new Chart(document.getElementById('graficaLineas'), {
+            type: 'line',
+            data: {
+                labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+                datasets: [{
+                    label: 'Reportes',
+                    data: {!! json_encode($tendenciaMensual) !!},
+                    borderColor: '#1A3A5C',
+                    backgroundColor: 'rgba(26,58,92,0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#1A3A5C'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
