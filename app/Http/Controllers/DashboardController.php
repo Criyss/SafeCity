@@ -27,26 +27,25 @@ class DashboardController extends Controller
         $categoriaData   = $categorias->pluck('reportes_count')->toArray();
 
         // Datos para la gráfica de barras (por departamento)
-        $departamentos      = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
-        $departamentoLabels = $departamentos;
+        $departamentoLabels = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
         $departamentoData   = [];
-        foreach ($departamentos as $dep) {
+        foreach ($departamentoLabels as $dep) {
             $departamentoData[] = Reporte::where('departamento', $dep)->count();
         }
 
         // Datos para la gráfica de líneas (reportes por mes del año actual)
-        $anio        = now()->year;
-        $mensualData = [];
+        $anio            = now()->year;
+        $tendenciaMensual = [];
         for ($mes = 1; $mes <= 12; $mes++) {
-            $mensualData[] = Reporte::whereYear('created_at', $anio)
-                                    ->whereMonth('created_at', $mes)
-                                    ->count();
+            $tendenciaMensual[] = Reporte::whereYear('created_at', $anio)
+                                         ->whereMonth('created_at', $mes)
+                                         ->count();
         }
 
         return view('dashboard.index', compact(
             'totalUsuarios', 'totalReportes', 'resueltos', 'pendientes',
             'ultimosReportes', 'categoriaLabels', 'categoriaData',
-            'departamentoLabels', 'departamentoData', 'mensualData'
+            'departamentoLabels', 'departamentoData', 'tendenciaMensual'
         ));
     }
 }
