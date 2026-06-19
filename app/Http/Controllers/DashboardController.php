@@ -27,8 +27,9 @@ class DashboardController extends Controller
         $categoriaData   = $categorias->pluck('reportes_count')->toArray();
 
         // Datos para la gráfica de barras (por departamento)
-        $departamentos    = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
-        $departamentoData = [];
+        $departamentos      = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
+        $departamentoLabels = $departamentos;
+        $departamentoData   = [];
         foreach ($departamentos as $dep) {
             $departamentoData[] = Reporte::where('departamento', $dep)->count();
         }
@@ -45,7 +46,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'totalUsuarios', 'totalReportes', 'resueltos', 'pendientes',
             'ultimosReportes', 'categoriaLabels', 'categoriaData',
-            'departamentoData', 'mensualData'
+            'departamentoLabels', 'departamentoData', 'mensualData'
         ));
     }
 }
