@@ -67,20 +67,33 @@
             </div>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <table class="table table-hover align-middle">
-                    <thead style="background-color: #1A3A5C; color: white;">
-                        <tr>
-                            <th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th>
-                        </tr>
+        @php
+            $personal    = $usuarios->filter(fn($u) => in_array($u->rol, ['administrador','supervisor']));
+            $ciudadanos  = $usuarios->filter(fn($u) => $u->rol === 'ciudadano');
+        @endphp
+
+        {{-- Personal del sistema --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-bold" style="background-color: #1A3A5C; color: white;">
+                <i class="bi bi-shield-lock me-2"></i>Personal del Sistema
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
                     </thead>
                     <tbody>
-                        @forelse($usuarios as $usuario)
+                        @forelse($personal as $usuario)
                         <tr>
-                            <td class="fw-semibold"><i class="bi bi-person-circle me-1 text-muted"></i>{{ $usuario->name }}</td>
+                            <td class="fw-semibold"><i class="bi bi-person-badge me-1 text-muted"></i>{{ $usuario->name }}</td>
                             <td>{{ $usuario->email }}</td>
-                            <td><span class="badge" style="background-color: #1A3A5C;">{{ $usuario->rol }}</span></td>
+                            <td>
+                                @if($usuario->rol === 'administrador')
+                                    <span class="badge" style="background-color: #1A3A5C;">administrador</span>
+                                @else
+                                    <span class="badge bg-secondary">supervisor</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($usuario->is_active)
                                     <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Activo</span>
@@ -98,20 +111,105 @@
                                 </form>
                                 <form action="/usuarios/{{ $usuario->id }}/delete" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar usuario?')">
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar">
                                         <i class="bi bi-trash me-1"></i>Eliminar
                                     </button>
                                 </form>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-inbox fs-3 d-block mb-2"></i>No hay usuarios registrados.</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted py-3">No hay administradores ni supervisores.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-                {{ $usuarios->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+
+        {{-- Ciudadanos registrados --}}
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold" style="background-color: #2E75B6; color: white;">
+                <i class="bi bi-people me-2"></i>Ciudadanos Registrados
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                        @forelse($ciudadanos as $usuario)
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-person-circle me-1 text-muted"></i>{{ $usuario->name }}</td>
+                            <td>{{ $usuario->email }}</td>
+                            <td><span class="badge bg-info text-dark">ciudadano</span></td>
+                            <td>
+                                @if($usuario->is_active)
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Activo</span>
+                                @else
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Bloqueado</span>
+                                @endif
+                            </td>
+                            <td class="d-flex gap-1 flex-wrap">
+                                <a href="/usuarios/{{ $usuario->id }}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Editar</a>
+                                <form action="/usuarios/{{ $usuario->id }}/toggle" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-toggle-{{ $usuario->is_active ? 'on' : 'off' }} me-1"></i>{{ $usuario->is_active ? 'Bloquear' : 'Activar' }}
+                                    </button>
+                                </form>
+                                <form action="/usuarios/{{ $usuario->id }}/delete" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar">
+                                        <i class="bi bi-trash me-1"></i>Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5" class="text-center text-muted py-3">No hay ciudadanos registrados.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mt-3">{{ $usuarios->links('pagination::bootstrap-5') }}</div>
+    </div>
+
+    {{-- Modal de confirmación de eliminación --}}
+    <div class="modal fade" id="modalEliminar" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div class="text-danger fs-1 w-100 text-center mt-2"><i class="bi bi-person-x-fill"></i></div>
+                </div>
+                <div class="modal-body text-center px-4 pb-0">
+                    <h5 class="fw-bold mb-1">¿Eliminar usuario?</h5>
+                    <p class="text-muted mb-0">Esta acción no se puede deshacer. El usuario perderá acceso al sistema.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2 pt-3">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger px-4" id="btnConfirmarEliminar">
+                        <i class="bi bi-trash me-1"></i>Sí, eliminar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var formEliminar = null;
+        var modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+
+        document.querySelectorAll('.btn-eliminar').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                formEliminar = this.closest('form');
+                modal.show();
+            });
+        });
+
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+            if (formEliminar) formEliminar.submit();
+        });
+    </script>
 </body>
 </html>
