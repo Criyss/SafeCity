@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Confiar en todos los proxies de Railway para que HTTPS funcione correctamente
+        $middleware->trustProxies(at: '*');
         $middleware->alias([
             'rol' => CheckRol::class,
         ]);
