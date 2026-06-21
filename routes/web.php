@@ -56,8 +56,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reportes/{reporte}/estado', [ReporteController::class, 'cambiarEstado'])->name('reportes.estado');
 });
 
+// Rutas del perfil
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil', [App\Http\Controllers\PerfilController::class, 'index'])->name('perfil');
+    Route::post('/perfil/update', [App\Http\Controllers\PerfilController::class, 'update'])->name('perfil.update');
+});
+
 // Rutas del mapa
 Route::get('/mapa', [App\Http\Controllers\MapaController::class, 'index'])->middleware('auth');
 Route::get('/mapa/reportes', [App\Http\Controllers\MapaController::class, 'reportesJson'])->middleware('auth');
 
-// Rutas del mapa público p
+// Rutas del mapa público para turistas
+Route::get('/mapa-seguridad', [App\Http\Controllers\MapaController::class, 'mapaPublico']);
+Route::get('/mapa-seguridad/reportes', [App\Http\Controllers\MapaController::class, 'reportesPublicoJson']);

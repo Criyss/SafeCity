@@ -27,17 +27,16 @@ class DashboardController extends Controller
         $categoriaData   = $categorias->pluck('reportes_count')->toArray();
 
         // Datos para la gráfica de barras (por departamento)
-        $departamentos      = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
-        $departamentoLabels = $departamentos;
+        $departamentoLabels = ['La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'];
         $departamentoData   = [];
-        foreach ($departamentos as $dep) {
+        foreach ($departamentoLabels as $dep) {
             $departamentoData[] = Reporte::where('departamento', $dep)->count();
         }
 
         // Datos para la gráfica de líneas (reportes por mes del año actual)
-        $anio           = now()->year;
-        $mensualLabels  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-        $mensualData    = [];
+        $anio             = now()->year;
+        $mensualLabels    = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        $mensualData      = [];
         $tendenciaMensual = [];
         for ($mes = 1; $mes <= 12; $mes++) {
             $count = Reporte::whereYear('created_at', $anio)
