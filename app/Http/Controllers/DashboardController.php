@@ -35,18 +35,23 @@ class DashboardController extends Controller
         }
 
         // Datos para la gráfica de líneas (reportes por mes del año actual)
-        $anio        = now()->year;
-        $mensualData = [];
+        $anio           = now()->year;
+        $mensualLabels  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        $mensualData    = [];
+        $tendenciaMensual = [];
         for ($mes = 1; $mes <= 12; $mes++) {
-            $mensualData[] = Reporte::whereYear('created_at', $anio)
-                                    ->whereMonth('created_at', $mes)
-                                    ->count();
+            $count = Reporte::whereYear('created_at', $anio)
+                            ->whereMonth('created_at', $mes)
+                            ->count();
+            $mensualData[]      = $count;
+            $tendenciaMensual[] = $count;
         }
 
         return view('dashboard.index', compact(
             'totalUsuarios', 'totalReportes', 'resueltos', 'pendientes',
             'ultimosReportes', 'categoriaLabels', 'categoriaData',
-            'departamentoLabels', 'departamentoData', 'mensualData'
+            'departamentoLabels', 'departamentoData',
+            'mensualLabels', 'mensualData', 'tendenciaMensual'
         ));
     }
 }
